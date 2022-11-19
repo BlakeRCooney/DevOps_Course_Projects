@@ -1,0 +1,17 @@
+play books are written in YAML format, example below.
+- hosts: web_server_group
+  tasks:
+  - name: Install Apache
+  - yum:
+        name: httpd
+        state: present
+   - name: Deploy Config
+      copy:
+         src: file/httpd.conf
+         dest: /etc/httpd.cong
+- hosts: database_server_group
+   tasks:
+   - name: Install Postgresql
+     yum:
+         name: postgresql
+         state: latest
