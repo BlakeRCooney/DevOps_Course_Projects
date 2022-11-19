@@ -1,0 +1,4 @@
+# Variables accessible by ALL the Hosts from the Inventory file
+database_user: test_admin
+database_pass: admin123
+database_name: redhat
