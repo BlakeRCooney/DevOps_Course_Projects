@@ -1,0 +1,36 @@
+- name: Setup DataBase Server
+  host: database_server_group
+  become: yes
+  vars:
+      dbname: groups
+      dbuser: devops
+      dbpass: admin123
+  tasks:
+      - debug:
+           var: dbname
+
+      - debug:
+           msg: “Value of dbuser is {{dbuser}}”
+
+      - name: Install Python MySQL Server
+        yum:
+            name: mariadb-server
+            state: present
+
+       - name: Start and Enable MariaDB Service
+         service: 
+              name: MySQL-python
+              state: started
+              enabled: yes
+
+       - name: Create a new database with the name ‘accounts’
+         mysql_db:
+              name: “{{dbname}}”
+              state: present
+
+       - name: Create a  database user with the name ‘admin’
+         mysql_user:
+             name: “{{dbuser}}”
+             password: “{{dbpass}}”
+             priv: ‘*.*:ALL’
+             state: present           
