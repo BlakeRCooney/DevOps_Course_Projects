@@ -1,0 +1,21 @@
+Copy the vproapp-node.yaml file into vproapp-loadbalancer.yaml the file should look as stated below
+
+    • apiVersion: v1
+    • kind: Service
+    • metadata:
+    •    name: helloworld-service
+    • spec:
+    •      ports:
+    •      - port: 80 (port of your load balancer)
+    •        targetPort: vproapp-port
+    •        protocol: TCP
+    •      selector:
+    •              app: vproapp
+    •      type: LoadBalancer
+
+Create the vproapp-loadbalancer
+kibectl create -f vproapp-loadbalancer.yaml
+
+Get the end point of the load balancer
+kubectl get svc
+(This should show an end point similar to a2cfa7fb6fe74d6ba549bae8a00ee77-1780682867.us-east-2.elb.amazonaws.com)
