@@ -1,0 +1,118 @@
+# Provisioning the servers based on selected OS
+
+- name: Provisioning Server
+  hosts: all
+  become: yes
+  vars:
+     ntp_path: /etc/ntp.conf
+  tasks:
+     - name: Install NTP on CentOS
+       yum:
+           name: “{{item}}”
+           state: present
+       when: ansible_distribution == “CentOS”
+       loop: 
+          - ntp
+          - wget
+          - git
+          - zip
+          - unzip
+
+      - name: Install NTP on Ubuntu
+        apt:
+           name: “{{item}}”
+           state: present
+        when: ansible_distribution == “Ubuntu”
+        loop: 
+           - ntp
+           - wget
+           - git
+           - zip
+           - unzip
+
+# Start and Enable the Service
+
+- name: Start and Enable NTP on RedHat
+  service:
+     name: ntpd
+     state: started
+     enabled: yes
+- name: Start and Enable NTP on Debian
+  service:
+     name: ntpd
+     state: started
+     enabled: yes
+     update_cache: yes
+  when: ansible_os_family == “Debian”
+
+
+
+
+# Creating a group and users
+  - name: Add Group
+    group:
+       name: devops
+       state: present
+
+   - name: Add Users
+     user:
+        name: “{{item}}”
+        state: present
+        group: devops
+     loop:
+        - user_one
+        - user_two
+        - user_three
+        - user_four
+
+- name: Bnner file /etc/motd
+  copy:
+      content: “This {{ansible_distribution}} is managed by Ansible. /n”
+      dest: /etc/motd
+# Deploy NTP conf file
+- name: Deploy NTP conf file for RedHat
+  template:
+     src: templates/ntp_redhat.conf.j2
+     dest: “{{ntp_path}}”
+  when: ansible_os_family == “RedHat”
+  notify:
+     - Restart NTP on RedHat
+
+- name: Deploy NTP conf file for Debian
+  template:
+     src: templates/ntp_debian.conf.j2
+     dest: “{{ntp_path}}”
+  when: ansible_os_family == “Debian”
+  notify:
+     - Restart NTP on Debian
+# Creating a directory
+- name: Directory for Dev Data
+  file:
+     path: /opt/devdata
+     state: directory
+     mode: 0775
+   tags:
+      - system
+  
+# Deploy Dev data file
+- name: Deploy Dev Data file
+  copy:
+     src: files/dev.txt
+     dest: /opt/devdata/dev.txt
+
+
+       
+# Restarting NTP Service
+- name: Restart NTP on RedHat
+   service:
+      name: ntpd
+      state: restarted
+      enabled: yes
+   when: ansible_os_family == “RedHat”
+
+- name: Restart NTP on Debian
+   service:
+      name: ntpd
+      state: restarted
+      enabled: yes
+   when: ansible_os_family == “Debian”
