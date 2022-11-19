@@ -1,0 +1,51 @@
+create service definition file - vproapppod.yaml file (the Pod file)
+    • apiVersion: v1
+    • kind: Pod
+    • metadata:
+    •       name: vproapp
+    •       labels:
+    •           app: vproapp
+    • spec:
+    •      containers:
+    •         - name: appcontainer
+    •           image: imranvisualpath/freshtomapp:V7
+    •           ports:
+    •              - name: vproapp-port
+    •                contaierPort: 8080
+
+Command to get the pod
+kubectl get pod
+
+write a service definition file:
+vim vproapp-nodeport.yaml
+
+It should look like below
+    • apiVersion: v1
+    • kind: Service
+    • metadata:
+    •     name: helloworld-service
+    • spec:
+    •      ports:
+    •      - port: 8090 (This is an internal port)
+    •           nodePort: 30001 (node ports start at 30000)
+    •           targetPort: 8080 (can use a name such as vproapp-port)
+    •           protocol: TCP
+    •      selector:
+    •           app: vproapp
+    •      type: NodePort
+
+Match this with the pod definition file
+cat vproapp-nodeport.yaml (with) cat vproapppod.yaml 
+
+Create the pod
+kubectl create -f vproapp-nodeport.yaml
+
+Check to see if the service is created
+kubectl get svc
+
+kubectl describe svc
+
+kubectl describe pod | grep IP
+
+This should automatically map to port 8080
+
