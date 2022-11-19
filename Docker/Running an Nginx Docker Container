@@ -1,0 +1,21 @@
+# Running an Nginx Docker Container
+First the container is needed to be pulled form Docker Hub.
+    • docker pull nginx
+
+Run docker images to make sure the repository is in the list of images
+    • docker images
+
+Next, running the container in a specified named application, also use -d to run detached from the kernel. Also the -p specifies a host port that the docker port can access through.
+    • docker run - - name first_web_server -p 7090:80 -d nginx 
+
+Logging into a docker container
+    • docker exec -it first_web_server /bin/bash
+
+removing a image/container
+    • docker rmi nginx
+
+Pulling a containerized version of ubuntu
+    • docker pull ubuntu
+      
+running the Ubuntu container
+    • docker run -it ubuntu /bin/bash
