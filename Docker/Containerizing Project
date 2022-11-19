@@ -1,0 +1,184 @@
+Creating a Dockerfile to run Tom Cat
+
+FROM openjdk:8 AS BUILD_IMAGE
+RUN apt update && apt install maven -y
+RUN git clone -b vp-docker https://github.com/imranvisualpath/vprofile-repo.git
+RUN cd vprofile-repo && mvn install
+
+FROM tomcat:8-jre11
+LABEL “Project”=”Vprofile”
+LABEL “Author”=”Blake Cooney”
+
+RUN rm -rf /usr/local/tomcat/webapps/*
+COPY --from=BUILD_IMAGE vprofile-repo/target/vprofile-v2.war  /usr/local/tomcat/webapps/ROOT.war
+
+EXPOSE 8080
+CMD [“catalina.sh”, “run”]
+
+
+# Commands after creation of YAML file
+docker build -t appimg:V1 .
+docker images
+cd git clone -b docker https://github.com/devopshydclub/vprofile-project.git
+cd vprofile-project/Docker-files/app/
+ls
+cd multistage/
+ls
+cat Dockerfile
+docker build -t appimg:v1 .
+docker images
+
+
+Creating a Dockerfile for MySQL Database
+FROM mysql:5.7.25
+LABEL “Project”=”Vprofile”
+LABEL “Author”=”Blake Cooney”
+
+ENV MYSQL_ROOT_PASSWORD=”yourdbpass”
+ENV MYSQL_DATABASE=”accounts”
+
+ADD db_backup.sql docker-entrypoint-initdb.d/db_backup.sql
+#Copy and paste the db_backup.sql from the src/resources folder into the docker file folder
+
+
+
+
+
+
+
+
+Creating a Dockefile for Nginx
+FROM nginx
+LABEL “Project”=”Vprofile”
+LABEL “Author”=”Blake Cooney”
+
+RUN rm -rf /etc/nginx/conf.d/default.conf
+COPY nginvproapp.conf /etc/nginx/conf.d/vproapp.conf
+
+
+
+Creating the nginvproapp.conf configuration file
+upstream vproapp {
+   server vproapp:8080;
+}
+server {
+   listen 80;
+location / {
+   proxy_pass http://vproapp;
+}
+}
+
+
+Build the Docker Containers
+docker build -t vprofile/vproapp:V1
+docker build -t vprofile/vprodb:V1
+docker build -t vprofile/vproweb:V1
+docker pull memcached
+docker pull rabbitmq
+
+
+
+
+
+
+
+
+
+
+
+Install Docker Compose
+
+echo “########################################################################”
+echo “Installing Docker Compose”
+echo “########################################################################”
+
+sudo curl -L “https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-(uname -m)” -o  /usr/local/bin/docker-compose
+
+echo “########################################################################”
+echo “Granting all users permission to use Docker Compose”
+echo “########################################################################”
+
+sudo chmod +x  /usr/local/bin/docker-compose
+
+echo “########################################################################”
+echo “Checking Docker Compose installed version”
+echo “########################################################################”
+dicker-compose --version
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Docker Compose YAML file
+
+version: “3.0”
+services:
+   vprodb:
+       image: vprofile/vprofiledb:V1
+       ports:
+           -  “3306:3306”
+       volumes: 
+           -  vprodbdata: /var/lib/mysql
+       environment: 
+            -  MYSQL_ROOT_PASSWORD=yourdbpass
+
+   vprocache01:
+        image: memcached
+        ports:
+            - “11211:11211”
+  
+   vpromq01:
+         image: rabbitmq
+         ports:
+             - “15672:15672”
+         environment:
+             - RABBITMQ_DEFAULT_USER=guest
+             - RABBITMQ_DEFAULT_PASS=guest
+
+  vproapp:
+        image: vprofile/vprofileapp:V1
+        ports:
+            - “8080:8080”
+        volumes: 
+            - vproappdata: /usr/local/tomcat/webapps
+         
+  vproweb:
+        image: vprofile/vprofileweb:V1
+        ports:
+            - “80:80”
+volumes:
+   vprodbdata: {}
+   vproappdata: {}
+
+
+
+
+
+Running the Container project
+docker-compose up
+# or in the background
+docker-compose up -d
+
+# pull up web browser and enter ip address
+
+Push to Docker Hub
+docker login
+
+Username:
+Password:
+
+docker push vprofile/vprofileapp:V1
+docker push vprofile/vprofileweb:V1
+docker push vprofile/vprofiledb:V1
