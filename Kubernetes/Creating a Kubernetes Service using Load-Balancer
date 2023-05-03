@@ -14,7 +14,7 @@ Copy the vproapp-node.yaml file into vproapp-loadbalancer.yaml the file should l
     •      type: LoadBalancer
 
 Create the vproapp-loadbalancer
-kibectl create -f vproapp-loadbalancer.yaml
+kubectl create -f vproapp-loadbalancer.yaml
 
 Get the end point of the load balancer
 kubectl get svc
